@@ -18,3 +18,10 @@ Xen will print messages to the UART.
 
 This script is a little bit like [https://github.com/mirage/xen-arm-builder](https://github.com/mirage/xen-arm-builder) and [https://github.com/RPi-Distro/pi-gen](https://github.com/RPi-Distro/pi-gen) but for Xen+Ubuntu instead of Raspbian.
 More info about Ubuntu Base is available here [https://wiki.ubuntu.com/Base](https://wiki.ubuntu.com/Base).
+
+## Limitations
+
+* System RAM limited to 1024M
+* PCIe not working
+* HDMI not working
+* Raspberry Pi kernel not suitable for domU
