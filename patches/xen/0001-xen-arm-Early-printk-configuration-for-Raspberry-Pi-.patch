@@ -1,0 +1,37 @@
+From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
+Date: Tue, 16 Jul 2019 10:25:11 -0400
+Subject: [PATCH 1/2] xen/arm: Early printk configuration for Raspberry Pi 4
+
+Signed-off-by: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
+---
+ docs/misc/arm/early-printk.txt | 1 +
+ xen/arch/arm/Rules.mk          | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/docs/misc/arm/early-printk.txt b/docs/misc/arm/early-printk.txt
+index f765f59ca5..75ab7c4523 100644
+--- a/docs/misc/arm/early-printk.txt
++++ b/docs/misc/arm/early-printk.txt
+@@ -44,6 +44,7 @@ the name of the machine:
+   - mvebu: printk with the MVEBU for Marvell Armada 3700 SoCs
+   - omap5432: printk with UART3 on TI OMAP5432 processors
+   - rcar3: printk with SCIF2 on Renesas R-Car Gen3 processors
++  - rpi4: printk with 8250 for Raspberry Pi 4
+   - seattle: printk with pl011 for AMD Seattle processor
+   - sun6i: printk with 8250 on Allwinner A31 processors
+   - sun7i: printk with 8250 on Allwinner A20 processors
+diff --git a/xen/arch/arm/Rules.mk b/xen/arch/arm/Rules.mk
+index f264592aef..d002dbb070 100644
+--- a/xen/arch/arm/Rules.mk
++++ b/xen/arch/arm/Rules.mk
+@@ -39,6 +39,7 @@ EARLY_PRINTK_midway         := pl011,0xfff36000
+ EARLY_PRINTK_mvebu          := mvebu,0xd0012000
+ EARLY_PRINTK_omap5432       := 8250,0x48020000,2
+ EARLY_PRINTK_rcar3          := scif,0xe6e88000
++EARLY_PRINTK_rpi4           := 8250,0xfe215040,2
+ EARLY_PRINTK_seattle        := pl011,0xe1010000
+ EARLY_PRINTK_sun6i          := 8250,0x01c28000,2
+ EARLY_PRINTK_sun7i          := 8250,0x01c28000,2
+-- 
+2.22.0
+

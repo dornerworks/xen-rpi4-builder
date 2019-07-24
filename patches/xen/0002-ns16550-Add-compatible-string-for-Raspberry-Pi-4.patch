@@ -1,0 +1,24 @@
+From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
+Date: Tue, 16 Jul 2019 10:32:15 -0400
+Subject: [PATCH 2/2] ns16550: Add compatible string for Raspberry Pi 4
+
+Signed-off-by: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
+---
+ xen/drivers/char/ns16550.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/xen/drivers/char/ns16550.c b/xen/drivers/char/ns16550.c
+index 189e121b7e..2b98d33382 100644
+--- a/xen/drivers/char/ns16550.c
++++ b/xen/drivers/char/ns16550.c
+@@ -1598,6 +1598,7 @@ static const struct dt_device_match ns16550_dt_match[] __initconst =
+     DT_MATCH_COMPATIBLE("ns16550"),
+     DT_MATCH_COMPATIBLE("ns16550a"),
+     DT_MATCH_COMPATIBLE("snps,dw-apb-uart"),
++    DT_MATCH_COMPATIBLE("brcm,bcm2835-aux-uart"),
+     { /* sentinel */ },
+ };
+ 
+-- 
+2.22.0
+

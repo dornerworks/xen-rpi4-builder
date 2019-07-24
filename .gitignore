@@ -1,0 +1,14 @@
+/firmware/
+/linux/
+/xen/
+/openocd/
+/qemu/
+/*.img
+/ubuntu-base-*-base-*.tar.gz
+/gcc-linaro-*-x86_64_aarch64-*.tar.xz
+/gcc-linaro-*-x86_64_aarch64-*/
+/gcc-arm-*-x86_64-aarch64-*.tar.xz
+/gcc-arm-*-x86_64-aarch64-*/
+/arm-trusted-firmware/
+/bootfiles/
+/*.log
