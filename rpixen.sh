@@ -306,23 +306,27 @@ proc            /proc           proc    defaults          0       0
 /dev/mmcblk0p2  /               ext4    defaults,noatime  0       1
 EOF
 
-# /etc/network/interfaces.d/eth0br0
-sudo bash -c "cat > ${MNTROOTFS}etc/network/interfaces.d/eth0br0" <<EOF
+# /etc/network/interfaces.d/eth0
+sudo bash -c "cat > ${MNTROOTFS}etc/network/interfaces.d/eth0" <<EOF
 auto eth0
 iface eth0 inet manual
+EOF
+sudo chmod 0644 ${MNTROOTFS}etc/network/interfaces.d/eth0
 
+# /etc/network/interfaces.d/xenbr0
+sudo bash -c "cat > ${MNTROOTFS}etc/network/interfaces.d/xenbr0" <<EOF
 auto xenbr0
 iface xenbr0 inet dhcp
     bridge_ports eth0
 EOF
-sudo chmod 0600 ${MNTROOTFS}etc/network/interfaces.d/eth0br0
+sudo chmod 0644 ${MNTROOTFS}etc/network/interfaces.d/xenbr0
 
 # Don't wait forever and a day for the network to come online
 if [ -s ${MNTROOTFS}lib/systemd/system/networking.service ]; then
-    sudo sed -i -e "s/TimeoutStartSec=5min/TimeoutStartSec=5sec/" ${MNTROOTFS}lib/systemd/system/networking.service
+    sudo sed -i -e "s/TimeoutStartSec=5min/TimeoutStartSec=15sec/" ${MNTROOTFS}lib/systemd/system/networking.service
 fi
 if [ -s ${MNTROOTFS}lib/systemd/system/ifup@.service ]; then
-    sudo bash -c "echo \"TimeoutStopSec=5s\" >> ${MNTROOTFS}lib/systemd/system/ifup@.service"
+    sudo bash -c "echo \"TimeoutStopSec=15s\" >> ${MNTROOTFS}lib/systemd/system/ifup@.service"
 fi
 
 # User account setup
