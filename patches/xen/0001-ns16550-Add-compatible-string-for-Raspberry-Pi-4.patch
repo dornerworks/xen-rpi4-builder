@@ -1,6 +1,6 @@
 From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
 Date: Tue, 16 Jul 2019 10:32:15 -0400
-Subject: [PATCH 2/2] ns16550: Add compatible string for Raspberry Pi 4
+Subject: [PATCH] ns16550: Add compatible string for Raspberry Pi 4
 
 Signed-off-by: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
 ---

@@ -31,8 +31,7 @@ if [ ! -d xen ]; then
     git clone git://xenbits.xen.org/xen.git
     cd xen
     git checkout staging-4.12
-    git am ${SCRIPTDIR}patches/xen/0001-xen-arm-Early-printk-configuration-for-Raspberry-Pi-.patch
-    git am ${SCRIPTDIR}patches/xen/0002-ns16550-Add-compatible-string-for-Raspberry-Pi-4.patch
+    git am ${SCRIPTDIR}patches/xen/0001-ns16550-Add-compatible-string-for-Raspberry-Pi-4.patch
     cd ${WRKDIR}
 fi
 
@@ -50,9 +49,9 @@ if [ ! -s ${WRKDIR}xen/xen/xen ]; then
     cd ${WRKDIR}xen
     if [ ! -s xen/.config ]; then
         echo "CONFIG_DEBUG=y" > xen/arch/arm/configs/arm64_defconfig
-        make -C xen XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=rpi4 defconfig
+        make -C xen XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 defconfig
     fi
-    make XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=rpi4 dist-xen -j $(nproc)
+    make XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 dist-xen -j $(nproc)
     cd ${WRKDIR}
 fi
 
