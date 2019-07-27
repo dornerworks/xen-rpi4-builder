@@ -275,21 +275,19 @@ cd ${WRKDIR}
 
 # It seems like the xen tools configure script selects a few too many of these backend driver modules, so we override it with a simpler list.
 # /usr/lib/modules-load.d/xen.conf
-cat > tmp-rpixen-script-generated-xen.conf <<EOF
+sudo bash -c "cat > ${MNTROOTFS}usr/lib/modules-load.d/xen.conf" <<EOF
 xen-evtchn
 xen-gntdev
 xen-gntalloc
 xen-blkback
 xen-netback
 EOF
-sudo cp tmp-rpixen-script-generated-xen.conf ${MNTROOTFS}usr/lib/modules-load.d/xen.conf
-rm tmp-rpixen-script-generated-xen.conf
 
 # /etc/hostname
 sudo bash -c "echo ${HOSTNAME} > ${MNTROOTFS}etc/hostname"
 
 # /etc/hosts
-cat > tmp-rpixen-script-generated-hosts <<EOF
+sudo bash -c "cat > ${MNTROOTFS}etc/hosts" <<EOF
 127.0.0.1	localhost
 127.0.1.1	${HOSTNAME}
 
@@ -299,22 +297,17 @@ fe00::0 ip6-localnet
 ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
-
 EOF
-sudo cp tmp-rpixen-script-generated-hosts ${MNTROOTFS}etc/hosts
-rm tmp-rpixen-script-generated-hosts
 
 # /etc/fstab
-cat > tmp-rpixen-script-generated-fstab <<EOF
+sudo bash -c "cat > ${MNTROOTFS}etc/fstab" <<EOF
 proc            /proc           proc    defaults          0       0
 /dev/mmcblk0p1  /boot           vfat    defaults          0       2
 /dev/mmcblk0p2  /               ext4    defaults,noatime  0       1
 EOF
-sudo cp tmp-rpixen-script-generated-fstab ${MNTROOTFS}etc/fstab
-rm tmp-rpixen-script-generated-fstab
 
 # /etc/network/interfaces.d/eth0br0
-cat > tmp-rpixen-script-generated-interfaces <<EOF
+sudo bash -c "cat > ${MNTROOTFS}etc/network/interfaces.d/eth0br0" <<EOF
 auto eth0
 iface eth0 inet manual
 
@@ -322,8 +315,6 @@ auto xenbr0
 iface xenbr0 inet dhcp
     bridge_ports eth0
 EOF
-sudo cp tmp-rpixen-script-generated-interfaces ${MNTROOTFS}etc/network/interfaces.d/eth0br0
-rm tmp-rpixen-script-generated-interfaces
 sudo chmod 0600 ${MNTROOTFS}etc/network/interfaces.d/eth0br0
 
 # Don't wait forever and a day for the network to come online
