@@ -6,10 +6,6 @@ Boot memory layout:
 0x00200000 - 0x003fffff xen (max size 2MiB)
 0x00480000 - 0x013fffff Image (max size 15.5MiB)
 
-Add maintenance interrupt - though it's unused in Xen nowadays, Xen still needs
-it to be present. The interrupt type, IRQ number, and mask/level were wild
-guesses based on other aarch64 SoCs.
-
 uart1, spi1, and spi2 share an IRQ. For debug purposes, it is helpful to assign
 uart1 (the mini/aux uart) to Xen, but Xen doesn't handle spi1 and spi2 and thus
 tries to pass those to dom0. This results in an error since the shared IRQ was
@@ -20,8 +16,8 @@ Add reg-shift and reg-io-width properties to uart1
 Unfortunately the pcie driver seems to be broken, so disable it for now.
 ---
  arch/arm64/boot/dts/broadcom/Makefile         |  1 +
- .../boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts | 36 +++++++++++++++++++
- 2 files changed, 37 insertions(+)
+ .../boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts | 32 +++++++++++++++++++
+ 2 files changed, 33 insertions(+)
  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts
 
 diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
@@ -38,10 +34,10 @@ index 33c8e599c1d7..42e6a94502cd 100644
  dtb-$(CONFIG_ARCH_BCM2835) += bcm2710-rpi-cm3.dtb
 diff --git a/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts
 new file mode 100644
-index 000000000000..f67e505a55d0
+index 000000000000..ec17c5595e49
 --- /dev/null
 +++ b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,32 @@
 +#include "bcm2711-rpi-4-b.dts"
 +
 +/ {
@@ -65,10 +61,6 @@ index 000000000000..f67e505a55d0
 +
 +/delete-node/ &spi1;
 +/delete-node/ &spi2;
-+
-+&gicv2 {
-+	interrupts = <GIC_PPI 9 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>;
-+};
 +
 +&uart1 {
 +	reg-shift = <2>;
