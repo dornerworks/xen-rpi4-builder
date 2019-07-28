@@ -2,16 +2,54 @@ From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
 Date: Tue, 16 Jul 2019 10:32:15 -0400
 Subject: [PATCH] ns16550: Add compatible string for Raspberry Pi 4
 
+Per the BCM2835 peripherals datasheet [1] page 10:
+"The UART core is build to emulate 16550 behaviour ... The implemented
+UART is not a 16650 compatible UART However as far as possible the
+first 8 control and status registers are laid out like a 16550 UART. Al
+16550 register bits which are not supported can be written but will be
+ignored and read back as 0. All control bits for simple UART receive/
+transmit operations are available."
+
+Additionally, Linux uses the 8250/16550 driver for the aux UART [2].
+
+Unfortunately the brcm,bcm2835-aux-uart device tree binding doesn't
+have the reg-shift and reg-io-width properties [3]. Thus, the reg-shift
+and reg-io-width properties are inherent properties of this UART.
+
+Thanks to Andre Przywara for contributing the reg-shift and
+reg-io-width setting snippet.
+
+In my testing, I have relied on enable_uart=1 being set in config.txt,
+a configuration file read by the Raspberry Pi's firmware. With
+enable_uart=1, the firmware performs UART initialization.
+
+[1] https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2835/BCM2835-ARM-Peripherals.pdf
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/drivers/tty/serial/8250/8250_bcm2835aux.c
+[3] https://www.kernel.org/doc/Documentation/devicetree/bindings/serial/brcm,bcm2835-aux-uart.txt
+
 Signed-off-by: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
 ---
- xen/drivers/char/ns16550.c | 1 +
- 1 file changed, 1 insertion(+)
+ xen/drivers/char/ns16550.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
 diff --git a/xen/drivers/char/ns16550.c b/xen/drivers/char/ns16550.c
-index 189e121b7e..2b98d33382 100644
+index e518f2d790..8667de6d67 100644
 --- a/xen/drivers/char/ns16550.c
 +++ b/xen/drivers/char/ns16550.c
-@@ -1598,6 +1598,7 @@ static const struct dt_device_match ns16550_dt_match[] __initconst =
+@@ -1585,6 +1585,12 @@ static int __init ns16550_uart_dt_init(struct dt_device_node *dev,
+     if ( uart->reg_width != 1 && uart->reg_width != 4 )
+         return -EINVAL;
+ 
++    if ( dt_device_is_compatible(dev, "brcm,bcm2835-aux-uart") )
++    {
++        uart->reg_width = 4;
++        uart->reg_shift = 2;
++    }
++
+     res = platform_get_irq(dev, 0);
+     if ( ! res )
+         return -EINVAL;
+@@ -1611,6 +1617,7 @@ static const struct dt_device_match ns16550_dt_match[] __initconst =
      DT_MATCH_COMPATIBLE("ns16550"),
      DT_MATCH_COMPATIBLE("ns16550a"),
      DT_MATCH_COMPATIBLE("snps,dw-apb-uart"),
