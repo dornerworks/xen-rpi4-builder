@@ -6,16 +6,11 @@ Boot memory layout:
 0x00200000 - 0x003fffff xen (max size 2MiB)
 0x00480000 - 0x013fffff Image (max size 15.5MiB)
 
-uart1, spi1, and spi2 share an IRQ. For debug purposes, it is helpful to assign
-uart1 (the mini/aux uart) to Xen, but Xen doesn't handle spi1 and spi2 and thus
-tries to pass those to dom0. This results in an error since the shared IRQ was
-already assigned to Xen. Disable spi1 and spi2 to allow use of uart1 in Xen.
-
 Unfortunately the pcie driver seems to be broken, so disable it for now.
 ---
  arch/arm64/boot/dts/broadcom/Makefile         |  1 +
- .../boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts | 27 +++++++++++++++++++
- 2 files changed, 28 insertions(+)
+ .../boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts | 19 +++++++++++++++++++
+ 2 files changed, 20 insertions(+)
  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts
 
 diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
@@ -32,10 +27,10 @@ index 33c8e599c1d7..42e6a94502cd 100644
  dtb-$(CONFIG_ARCH_BCM2835) += bcm2710-rpi-cm3.dtb
 diff --git a/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts
 new file mode 100644
-index 000000000000..1e8f1d52cecf
+index 000000000000..bad7b99836e1
 --- /dev/null
 +++ b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b-xen.dts
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,19 @@
 +#include "bcm2711-rpi-4-b.dts"
 +
 +/ {
@@ -50,15 +45,7 @@ index 000000000000..1e8f1d52cecf
 +			reg = <0x00480000 0x00f80000>;
 +		};
 +	};
-+
-+	aliases {
-+		/delete-property/ spi1;
-+		/delete-property/ spi2;
-+	};
 +};
-+
-+/delete-node/ &spi1;
-+/delete-node/ &spi2;
 +
 +&pcie_0 {
 +	status = "disabled";

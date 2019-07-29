@@ -32,6 +32,7 @@ if [ ! -d xen ]; then
     cd xen
     git checkout staging-4.12
     git am ${SCRIPTDIR}patches/xen/0001-ns16550-Add-compatible-string-for-Raspberry-Pi-4.patch
+    git am ${SCRIPTDIR}patches/xen/0002-xen-arm-platform-Add-Raspberry-Pi-platform.patch
     cd ${WRKDIR}
 fi
 

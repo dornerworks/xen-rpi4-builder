@@ -1,0 +1,93 @@
+From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
+Date: Sun, 28 Jul 2019 10:58:11 -0400
+Subject: [PATCH 2/2] xen/arm: platform: Add Raspberry Pi platform
+
+The aux peripherals (uart1, spi1, and spi2) share an IRQ and a page of
+memory. For debugging, it is helpful to use the aux UART in Xen. In
+this case, Xen would try to assign spi1 and spi2 to dom0, but this
+results in an error since the shared IRQ was already assigned to Xen.
+Blacklist aux devices other than the UART to prevent mapping the shared
+IRQ and memory range to dom0.
+
+Signed-off-by: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
+---
+ xen/arch/arm/platforms/Makefile            |  1 +
+ xen/arch/arm/platforms/brcm-raspberry-pi.c | 55 ++++++++++++++++++++++
+ 2 files changed, 56 insertions(+)
+ create mode 100644 xen/arch/arm/platforms/brcm-raspberry-pi.c
+
+diff --git a/xen/arch/arm/platforms/Makefile b/xen/arch/arm/platforms/Makefile
+index 01608f89ee..8632f4115f 100644
+--- a/xen/arch/arm/platforms/Makefile
++++ b/xen/arch/arm/platforms/Makefile
+@@ -8,5 +8,6 @@ obj-$(CONFIG_ALL64_PLAT) += seattle.o
+ obj-$(CONFIG_ALL_PLAT)   += sunxi.o
+ obj-$(CONFIG_ALL64_PLAT) += thunderx.o
+ obj-$(CONFIG_ALL64_PLAT) += xgene-storm.o
++obj-$(CONFIG_ALL64_PLAT) += brcm-raspberry-pi.o
+ obj-$(CONFIG_MPSOC_PLATFORM)  += xilinx-zynqmp.o
+ obj-$(CONFIG_MPSOC_PLATFORM)  += xilinx-zynqmp-eemi.o
+diff --git a/xen/arch/arm/platforms/brcm-raspberry-pi.c b/xen/arch/arm/platforms/brcm-raspberry-pi.c
+new file mode 100644
+index 0000000000..e22d2b3184
+--- /dev/null
++++ b/xen/arch/arm/platforms/brcm-raspberry-pi.c
+@@ -0,0 +1,55 @@
++/*
++ * xen/arch/arm/platforms/brcm-raspberry-pi.c
++ *
++ * Raspberry Pi 4 Platform specific settings.
++ *
++ * Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
++ * Copyright (c) 2019 DornerWorks, Ltd
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <asm/platform.h>
++
++static const char *const brcm_bcm2838_dt_compat[] __initconst =
++{
++    "brcm,bcm2838",
++    NULL
++};
++
++static const struct dt_device_match brcm_bcm2838_blacklist_dev[] __initconst =
++{
++    /*
++     * The aux SPIs share an IRQ and a page with the aux UART.
++     * If the same page gets mapped to dom0 and Xen, there is risk of
++     * dom0 writing to the UART that Xen controls.
++     */
++    DT_MATCH_COMPATIBLE("brcm,bcm2835-aux-spi"),
++    /*
++     * The aux peripheral also shares a page with the aux UART.
++     */
++    DT_MATCH_COMPATIBLE("brcm,bcm2835-aux"),
++    { /* sentinel */ },
++};
++
++PLATFORM_START(brcm_bcm2838, "Raspberry Pi 4")
++    .compatible     = brcm_bcm2838_dt_compat,
++    .blacklist_dev  = brcm_bcm2838_blacklist_dev,
++PLATFORM_END
++
++/*
++ * Local variables:
++ * mode: C
++ * c-file-style: "BSD"
++ * c-basic-offset: 4
++ * indent-tabs-mode: nil
++ * End:
++ */
+-- 
+2.22.0
+
