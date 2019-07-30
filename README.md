@@ -22,6 +22,5 @@ More info about Ubuntu Base is available here [https://wiki.ubuntu.com/Base](htt
 ## Limitations
 
 * System RAM limited to 1024M
-* PCIe not working
 * HDMI not working
 * Raspberry Pi kernel not suitable for domU
