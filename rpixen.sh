@@ -41,6 +41,7 @@ if [ ! -d linux ]; then
     cd linux
     git am ${SCRIPTDIR}patches/linux/0001-Add-RPi4-bcm2711-device-tree-for-Xen.patch
     git am ${SCRIPTDIR}patches/linux/0002-Disable-DMA-in-sdhci-driver.patch
+    git am ${SCRIPTDIR}patches/linux/0003-Fix-PCIe-in-dom0-for-RPi4.patch
     cd ${WRKDIR}
 fi
 
