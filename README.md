@@ -24,3 +24,12 @@ More info about Ubuntu Base is available here [https://wiki.ubuntu.com/Base](htt
 * System RAM limited to 1024M
 * HDMI not working
 * Raspberry Pi kernel not suitable for domU
+* aux spi1 and aux spi2 are disabled
+
+## 32-bit Linux
+
+A 32-bit linux kernel may be built by doing:
+
+    $ ./rpixen.sh armhf
+
+Xen will be built for aarch64 regardless.

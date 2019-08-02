@@ -14,13 +14,15 @@ SALT=dw
 HASHED_PASSWORD=$(perl -e "print crypt(\"${PASSWORD}\",\"${SALT}\");")
 HOSTNAME=ubuntu
 
+BUILD_ARCH=${1:-arm64}
+
 sudo apt install device-tree-compiler tftpd-hpa flex bison qemu-utils kpartx git curl qemu-user-static binfmt-support parted bc libncurses5-dev libssl-dev pkg-config
 
 source ${SCRIPTDIR}toolchain-aarch64-linux-gnu.sh
+source ${SCRIPTDIR}toolchain-arm-linux-gnueabihf.sh
 
 DTBFILE=bcm2711-rpi-4-b-xen.dtb
 XEN_ADDR=0x00200000
-LINUX_ADDR=0x00480000
 
 # Clone sources
 if [ ! -d firmware ]; then
@@ -52,6 +54,7 @@ if [ ! -s ${WRKDIR}xen/xen/xen ]; then
     cd ${WRKDIR}xen
     if [ ! -s xen/.config ]; then
         echo "CONFIG_DEBUG=y" > xen/arch/arm/configs/arm64_defconfig
+        echo "CONFIG_SCHED_ARINC653=y" >> xen/arch/arm/configs/arm64_defconfig
         make -C xen XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 defconfig
     fi
     make XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 dist-xen -j $(nproc)
@@ -59,18 +62,29 @@ if [ ! -s ${WRKDIR}xen/xen/xen ]; then
 fi
 
 # Build Linux
-if [ ! -s ${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image ]; then
-    cd ${WRKDIR}linux
+cd ${WRKDIR}linux
+if [ "${BUILD_ARCH}" == "arm64" ]; then
     if [ ! -s ${WRKDIR}linux/.build-arm64/.config ]; then
         # utilize kernel/configs/xen.config fragment
         make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig xen.config
     fi
-
     make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) broadcom/${DTBFILE}
-    echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
-    make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
-    cd ${WRKDIR}
+    if [ ! -s ${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image ]; then
+        echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
+        make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
+    fi
+elif [ "${BUILD_ARCH}" == "armhf" ]; then
+    if [ ! -s ${WRKDIR}linux/.build-arm32/.config ]; then
+        # utilize kernel/configs/xen.config fragment
+        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2711_defconfig xen.config
+    fi
+    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) ${DTBFILE}
+    if [ ! -s ${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage ]; then
+        echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
+        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) zImage modules dtbs > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
+    fi
 fi
+cd ${WRKDIR}
 
 
 if [ ! -d bootfiles ]; then
@@ -79,7 +93,11 @@ fi
 
 cp ${WRKDIR}firmware/boot/fixup4*.dat ${WRKDIR}firmware/boot/start4*.elf bootfiles/
 
+if [ "${BUILD_ARCH}" == "arm64" ]; then
 cp ${WRKDIR}linux/.build-arm64/arch/arm64/boot/dts/broadcom/${DTBFILE} bootfiles/
+elif [ "${BUILD_ARCH}" == "armhf" ]; then
+cp ${WRKDIR}linux/.build-arm32/arch/arm/boot/dts/${DTBFILE} bootfiles/
+fi
 
 cat > bootfiles/cmdline.txt <<EOF
 console=hvc0 clk_ignore_unused root=/dev/mmcblk0p2 rootwait
@@ -117,12 +135,24 @@ dd if=/dev/zero of=bootfiles/kernel8.img bs=1024 count=18432
 # Assuming xen is less than 2MiB in size
 dd if=${WRKDIR}xen/xen/xen of=bootfiles/kernel8.img bs=1024 conv=notrunc
 
+if [ "${BUILD_ARCH}" == "arm64" ]; then
 # Assuming linux is less than 15.5MiB in size
 # Image is offset by 2.5MiB from the beginning of the file
 dd if=${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image of=bootfiles/kernel8.img bs=1024 seek=2560 conv=notrunc
+elif [ "${BUILD_ARCH}" == "armhf" ]; then
+# Assuming linux is less than 16MiB in size
+# Image is offset by 2MiB from the beginning of the file
+dd if=${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage of=bootfiles/kernel8.img bs=1024 seek=2048 conv=notrunc
+fi
 
 if [ -d /media/${USER}/boot/ ]; then
     cp bootfiles/* /media/${USER}/boot/
+    sync
+fi
+
+if [ "${BUILD_ARCH}" == "armhf" ]; then
+    # The rest of the script assumes aarch64, so just exit for now
+    exit
 fi
 
 ROOTFS=ubuntu-base-18.04.2-base-arm64-prepped.tar.gz
@@ -204,7 +234,11 @@ sudo cp $(which qemu-aarch64-static) ${MNTROOTFS}usr/bin/
 sudo cp bootfiles/* ${MNTBOOT}
 
 cd ${WRKDIR}linux
+if [ "${BUILD_ARCH}" == "arm64" ]; then
 sudo --preserve-env PATH=${PATH} make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
+elif [ "${BUILD_ARCH}" == "armhf" ]; then
+sudo --preserve-env PATH=${PATH} make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
+fi
 cd ${WRKDIR}
 
 # /etc/resolv.conf is required for internet connectivity in chroot. It will get overwritten by dhcp, so don't get too attached to it.
