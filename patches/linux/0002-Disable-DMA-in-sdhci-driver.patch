@@ -1,7 +1,7 @@
 From 758bc9b917469bc4e527dc3aae821c91cbc3d426 Mon Sep 17 00:00:00 2001
 From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
 Date: Thu, 18 Jul 2019 00:01:27 -0400
-Subject: [PATCH 2/3] Disable DMA in sdhci driver
+Subject: [PATCH 2/4] Disable DMA in sdhci driver
 
 ---
  drivers/mmc/host/sdhci-iproc.c | 2 ++

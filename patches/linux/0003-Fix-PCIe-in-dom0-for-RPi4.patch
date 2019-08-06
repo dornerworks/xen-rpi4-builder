@@ -1,7 +1,7 @@
 From 77765c2a47ce43911b8fe7b09f037c9bc13008ca Mon Sep 17 00:00:00 2001
 From: Jeff Kubascik <jeff.kubascik@dornerworks.com>
 Date: Tue, 30 Jul 2019 08:49:56 -0400
-Subject: [PATCH 3/3] Fix PCIe in dom0 for RPi4
+Subject: [PATCH 3/4] Fix PCIe in dom0 for RPi4
 
 There is an issue where the Broadcom PCIe driver and Xen swiotlb layer
 invoke each other's dma alloc function recursively until the stack blows

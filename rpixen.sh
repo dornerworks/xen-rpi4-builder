@@ -39,9 +39,10 @@ fi
 if [ ! -d linux ]; then
     git clone --depth 1 --branch rpi-4.19.y https://github.com/raspberrypi/linux.git linux
     cd linux
-    git am ${SCRIPTDIR}patches/linux/0001-Add-RPi4-bcm2711-device-tree-for-Xen.patch
+    git am ${SCRIPTDIR}patches/linux/0001-Add-RPi4-bcm2711-device-tree-for-Xen-64-bit-Linux.patch
     git am ${SCRIPTDIR}patches/linux/0002-Disable-DMA-in-sdhci-driver.patch
     git am ${SCRIPTDIR}patches/linux/0003-Fix-PCIe-in-dom0-for-RPi4.patch
+    git am ${SCRIPTDIR}patches/linux/0004-Add-RPi4-bcm2711-device-tree-for-Xen-32-bit-Linux.patch
     cd ${WRKDIR}
 fi
 
