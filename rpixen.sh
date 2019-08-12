@@ -155,7 +155,7 @@ if [ "${BUILD_ARCH}" == "armhf" ]; then
     exit
 fi
 
-ROOTFS=ubuntu-base-18.04.2-base-arm64-prepped.tar.gz
+ROOTFS=ubuntu-base-18.04.3-base-arm64-prepped.tar.gz
 if [ ! -s ${ROOTFS} ]; then
     ./ubuntu-base-prep.sh
 fi
