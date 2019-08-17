@@ -229,8 +229,6 @@ sudo tar -C ${MNTROOTFS} -xf ${ROOTFS}
 
 mountstuff
 
-sudo cp $(which qemu-aarch64-static) ${MNTROOTFS}usr/bin/
-
 sudo cp bootfiles/* ${MNTBOOT}
 
 cd ${WRKDIR}linux
@@ -241,17 +239,6 @@ elif [ "${BUILD_ARCH}" == "armhf" ]; then
 fi
 cd ${WRKDIR}
 
-# /etc/resolv.conf is required for internet connectivity in chroot. It will get overwritten by dhcp, so don't get too attached to it.
-sudo chroot ${MNTROOTFS} bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
-sudo chroot ${MNTROOTFS} bash -c 'echo "nameserver 2001:4860:4860::8888" >> /etc/resolv.conf'
-
-sudo sed -i -e "s/# deb /deb /" ${MNTROOTFS}etc/apt/sources.list
-sudo chroot ${MNTROOTFS} apt-get update
-
-# Install the dialog package and others first to squelch some warnings
-sudo chroot ${MNTROOTFS} apt-get -y install dialog apt-utils
-sudo chroot ${MNTROOTFS} apt-get -y upgrade
-sudo chroot ${MNTROOTFS} apt-get -y install systemd systemd-sysv sysvinit-utils sudo udev rsyslog kmod util-linux sed netbase dnsutils ifupdown isc-dhcp-client isc-dhcp-common less vim net-tools iproute2 iputils-ping libnss-mdns iw software-properties-common ethtool dmsetup hostname iptables logrotate lsb-base lsb-release plymouth psmisc tar tcpd libsystemd-dev symlinks uuid-dev libc6-dev libncurses-dev libglib2.0-dev build-essential bridge-utils zlib1g-dev patch libpixman-1-dev libyajl-dev libfdt-dev libaio-dev git libusb-1.0-0-dev libpulse-dev
 
 # Change the shared library symlinks to relative instead of absolute so they play nice with cross-compiling
 sudo chroot ${MNTROOTFS} symlinks -c /usr/lib/aarch64-linux-gnu/
