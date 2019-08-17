@@ -94,9 +94,9 @@ fi
 cp ${WRKDIR}firmware/boot/fixup4*.dat ${WRKDIR}firmware/boot/start4*.elf bootfiles/
 
 if [ "${BUILD_ARCH}" == "arm64" ]; then
-cp ${WRKDIR}linux/.build-arm64/arch/arm64/boot/dts/broadcom/${DTBFILE} bootfiles/
+    cp ${WRKDIR}linux/.build-arm64/arch/arm64/boot/dts/broadcom/${DTBFILE} bootfiles/
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
-cp ${WRKDIR}linux/.build-arm32/arch/arm/boot/dts/${DTBFILE} bootfiles/
+    cp ${WRKDIR}linux/.build-arm32/arch/arm/boot/dts/${DTBFILE} bootfiles/
 fi
 
 cat > bootfiles/cmdline.txt <<EOF
@@ -136,13 +136,13 @@ dd if=/dev/zero of=bootfiles/kernel8.img bs=1024 count=18432
 dd if=${WRKDIR}xen/xen/xen of=bootfiles/kernel8.img bs=1024 conv=notrunc
 
 if [ "${BUILD_ARCH}" == "arm64" ]; then
-# Assuming linux is less than 15.5MiB in size
-# Image is offset by 2.5MiB from the beginning of the file
-dd if=${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image of=bootfiles/kernel8.img bs=1024 seek=2560 conv=notrunc
+    # Assuming linux is less than 15.5MiB in size
+    # Image is offset by 2.5MiB from the beginning of the file
+    dd if=${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image of=bootfiles/kernel8.img bs=1024 seek=2560 conv=notrunc
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
-# Assuming linux is less than 16MiB in size
-# Image is offset by 2MiB from the beginning of the file
-dd if=${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage of=bootfiles/kernel8.img bs=1024 seek=2048 conv=notrunc
+    # Assuming linux is less than 16MiB in size
+    # Image is offset by 2MiB from the beginning of the file
+    dd if=${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage of=bootfiles/kernel8.img bs=1024 seek=2048 conv=notrunc
 fi
 
 if [ -d /media/${USER}/boot/ ]; then
@@ -235,9 +235,9 @@ sudo cp bootfiles/* ${MNTBOOT}
 
 cd ${WRKDIR}linux
 if [ "${BUILD_ARCH}" == "arm64" ]; then
-sudo --preserve-env PATH=${PATH} make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
+    sudo --preserve-env PATH=${PATH} make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
-sudo --preserve-env PATH=${PATH} make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
+    sudo --preserve-env PATH=${PATH} make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
 fi
 cd ${WRKDIR}
 
