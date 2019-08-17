@@ -150,14 +150,9 @@ if [ -d /media/${USER}/boot/ ]; then
     sync
 fi
 
-if [ "${BUILD_ARCH}" == "armhf" ]; then
-    # The rest of the script assumes aarch64, so just exit for now
-    exit
-fi
-
-ROOTFS=ubuntu-base-18.04.3-base-arm64-prepped.tar.gz
+ROOTFS=ubuntu-base-18.04.3-base-${BUILD_ARCH}-prepped.tar.gz
 if [ ! -s ${ROOTFS} ]; then
-    ./ubuntu-base-prep.sh
+    ./ubuntu-base-prep.sh ${BUILD_ARCH}
 fi
 
 
@@ -240,8 +235,18 @@ fi
 cd ${WRKDIR}
 
 
+# Build Xen tools
+
+if [ "${BUILD_ARCH}" == "arm64" ]; then
+    CROSS_PREFIX=aarch64-linux-gnu
+    XEN_ARCH=arm64
+elif [ "${BUILD_ARCH}" == "armhf" ]; then
+    CROSS_PREFIX=arm-linux-gnueabihf
+    XEN_ARCH=arm32
+fi
+
 # Change the shared library symlinks to relative instead of absolute so they play nice with cross-compiling
-sudo chroot ${MNTROOTFS} symlinks -c /usr/lib/aarch64-linux-gnu/
+sudo chroot ${MNTROOTFS} symlinks -c /usr/lib/${CROSS_PREFIX}/
 
 cd ${WRKDIR}xen
 
@@ -251,7 +256,11 @@ cd ${WRKDIR}xen
 SYSINCDIRS=$(echo $(sudo chroot ${MNTROOTFS} bash -c "echo | gcc -E -Wp,-v -o /dev/null - 2>&1" | grep "^ " | sed "s|^ /| -isystem${MNTROOTFS}|"))
 SYSINCDIRSCXX=$(echo $(sudo chroot ${MNTROOTFS} bash -c "echo | g++ -x c++ -E -Wp,-v -o /dev/null - 2>&1" | grep "^ " | sed "s|^ /| -isystem${MNTROOTFS}|"))
 
-LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/aarch64-linux-gnu -Wl,-rpath-link=${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
+CC="${CROSS_PREFIX}-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTROOTFS}lib/${CROSS_PREFIX} -B${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
+CXX="${CROSS_PREFIX}-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/${CROSS_PREFIX} -B${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
+LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/${CROSS_PREFIX} -Wl,-rpath-link=${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
+
+LDFLAGS="${LDFLAGS}" \
 ./configure \
     PYTHON_PREFIX_ARG=--install-layout=deb \
     --enable-systemd \
@@ -262,29 +271,29 @@ LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/aarch64-linux-gnu -Wl,-rpath-link=${MNT
     --prefix=/usr \
     --with-xenstored=xenstored \
     --build=x86_64-linux-gnu \
-    --host=aarch64-linux-gnu \
-    CC="aarch64-linux-gnu-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTROOTFS}lib/aarch64-linux-gnu -B${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
-    CXX="aarch64-linux-gnu-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/aarch64-linux-gnu -B${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
-    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/aarch64-linux-gnu/pkgconfig:${MNTROOTFS}usr/share/pkgconfig
+    --host=${CROSS_PREFIX} \
+    CC="${CC}" \
+    CXX="${CXX}" \
+    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig
 
 PKG_CONFIG=pkg-config \
-LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/aarch64-linux-gnu -Wl,-rpath-link=${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
+LDFLAGS="${LDFLAGS}" \
 make dist-tools \
-    CROSS_COMPILE=aarch64-linux-gnu- XEN_TARGET_ARCH=arm64 \
-    CC="aarch64-linux-gnu-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTROOTFS}lib/aarch64-linux-gnu -B${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
-    CXX="aarch64-linux-gnu-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/aarch64-linux-gnu -B${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
-    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/aarch64-linux-gnu/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+    CROSS_COMPILE=${CROSS_PREFIX}- XEN_TARGET_ARCH=${XEN_ARCH} \
+    CC="${CC}" \
+    CXX="${CXX}" \
+    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
     QEMU_PKG_CONFIG_FLAGS=--define-variable=prefix=${MNTROOTFS}usr \
     -j $(nproc)
 
 sudo --preserve-env PATH=${PATH} \
 PKG_CONFIG=pkg-config \
-LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/aarch64-linux-gnu -Wl,-rpath-link=${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
+LDFLAGS="${LDFLAGS}" \
 make install-tools \
-    CROSS_COMPILE=aarch64-linux-gnu- XEN_TARGET_ARCH=arm64 \
-    CC="aarch64-linux-gnu-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTROOTFS}lib/aarch64-linux-gnu -B${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
-    CXX="aarch64-linux-gnu-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/aarch64-linux-gnu -B${MNTROOTFS}usr/lib/aarch64-linux-gnu" \
-    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/aarch64-linux-gnu/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+    CROSS_COMPILE=${CROSS_PREFIX}- XEN_TARGET_ARCH=${XEN_ARCH} \
+    CC="${CC}" \
+    CXX="${CXX}" \
+    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
     QEMU_PKG_CONFIG_FLAGS=--define-variable=prefix=${MNTROOTFS}usr \
     DESTDIR=${MNTROOTFS}
 

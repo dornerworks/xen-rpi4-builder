@@ -69,7 +69,9 @@ sudo tar -C ${MNTROOTFS} -xf ${ROOTFS}
 mountstuff
 
 if [ "${ARCH}" == "arm64" ]; then
-    sudo cp `which qemu-aarch64-static` ${MNTROOTFS}usr/bin/
+    sudo cp $(which qemu-aarch64-static) ${MNTROOTFS}usr/bin/
+elif [ "${ARCH}" == "armhf" ]; then
+    sudo cp `which qemu-arm-static` ${MNTROOTFS}usr/bin/
 fi
 
 # /etc/resolv.conf is required for internet connectivity in chroot. It will get overwritten by dhcp, so don't get too attached to it.
