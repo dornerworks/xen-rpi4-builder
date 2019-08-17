@@ -16,7 +16,7 @@ HOSTNAME=ubuntu
 
 BUILD_ARCH=${1:-arm64}
 
-sudo apt install device-tree-compiler tftpd-hpa flex bison qemu-utils kpartx git curl qemu-user-static binfmt-support parted bc libncurses5-dev libssl-dev pkg-config
+sudo apt install device-tree-compiler tftpd-hpa flex bison qemu-utils kpartx git curl qemu-user-static binfmt-support parted bc libncurses5-dev libssl-dev pkg-config python acpica-tools
 
 source ${SCRIPTDIR}toolchain-aarch64-linux-gnu.sh
 source ${SCRIPTDIR}toolchain-arm-linux-gnueabihf.sh
