@@ -1,3 +1,4 @@
+From b231328587066cc80d23167ae0f6913171532703 Mon Sep 17 00:00:00 2001
 From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
 Date: Fri, 2 Aug 2019 23:05:20 -0400
 Subject: [PATCH 4/4] Add RPi4 (bcm2711) device tree for Xen (32-bit Linux)
@@ -15,11 +16,11 @@ the PCI address space.
  create mode 100644 arch/arm/boot/dts/bcm2711-rpi-4-b-xen.dts
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index c75b6f549b46..d5a7ef831fbb 100644
+index 1e8c1b25b..1f06847f5 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -9,6 +9,7 @@ dtb-$(CONFIG_ARCH_BCM2835) += \
- 	bcm2709-rpi-2-b.dtb \
+@@ -10,6 +10,7 @@ dtb-$(CONFIG_ARCH_BCM2835) += \
+ 	bcm2710-rpi-2-b.dtb \
  	bcm2710-rpi-3-b.dtb \
  	bcm2711-rpi-4-b.dtb \
 +	bcm2711-rpi-4-b-xen.dtb \
