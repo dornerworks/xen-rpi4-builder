@@ -258,6 +258,9 @@ CC="${CROSS_PREFIX}-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTRO
 CXX="${CROSS_PREFIX}-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/${CROSS_PREFIX} -B${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
 LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/${CROSS_PREFIX} -Wl,-rpath-link=${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
 
+PKG_CONFIG=pkg-config \
+PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
 ./configure \
     PYTHON_PREFIX_ARG=--install-layout=deb \
@@ -271,28 +274,27 @@ LDFLAGS="${LDFLAGS}" \
     --build=x86_64-linux-gnu \
     --host=${CROSS_PREFIX} \
     CC="${CC}" \
-    CXX="${CXX}" \
-    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig
+    CXX="${CXX}"
 
 PKG_CONFIG=pkg-config \
+PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
 make dist-tools \
     CROSS_COMPILE=${CROSS_PREFIX}- XEN_TARGET_ARCH=${XEN_ARCH} \
     CC="${CC}" \
     CXX="${CXX}" \
-    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
-    QEMU_PKG_CONFIG_FLAGS=--define-variable=prefix=${MNTROOTFS}usr \
     -j $(nproc)
 
 sudo --preserve-env PATH=${PATH} \
 PKG_CONFIG=pkg-config \
+PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
 make install-tools \
     CROSS_COMPILE=${CROSS_PREFIX}- XEN_TARGET_ARCH=${XEN_ARCH} \
     CC="${CC}" \
     CXX="${CXX}" \
-    PKG_CONFIG_PATH=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
-    QEMU_PKG_CONFIG_FLAGS=--define-variable=prefix=${MNTROOTFS}usr \
     DESTDIR=${MNTROOTFS}
 
 sudo chroot ${MNTROOTFS} systemctl enable xen-qemu-dom0-disk-backend.service
