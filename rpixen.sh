@@ -21,7 +21,12 @@ sudo apt install device-tree-compiler tftpd-hpa flex bison qemu-utils kpartx git
 source ${SCRIPTDIR}toolchain-aarch64-linux-gnu.sh
 source ${SCRIPTDIR}toolchain-arm-linux-gnueabihf.sh
 
-DTBFILE=bcm2711-rpi-4-b-xen.dtb
+DTBFILE=bcm2711-rpi-4-b.dtb
+if [ "${BUILD_ARCH}" == "arm64" ]; then
+    DTBXENO=pi4-64-xen
+else
+    DTBXENO=pi4-32-xen
+fi
 XEN_ADDR=0x00200000
 
 # Clone sources
@@ -39,10 +44,7 @@ fi
 if [ ! -d linux ]; then
     git clone --depth 1 --branch rpi-4.19.y https://github.com/raspberrypi/linux.git linux
     cd linux
-    git am ${SCRIPTDIR}patches/linux/0001-Add-RPi4-bcm2711-device-tree-for-Xen-64-bit-Linux.patch
-    git am ${SCRIPTDIR}patches/linux/0002-Disable-DMA-in-sdhci-driver.patch
-    git am ${SCRIPTDIR}patches/linux/0003-Fix-PCIe-in-dom0-for-RPi4.patch
-    git am ${SCRIPTDIR}patches/linux/0004-Add-RPi4-bcm2711-device-tree-for-Xen-32-bit-Linux.patch
+    git am ${SCRIPTDIR}patches/linux/*.patch
     cd ${WRKDIR}
 fi
 
@@ -67,6 +69,7 @@ if [ "${BUILD_ARCH}" == "arm64" ]; then
         make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig xen.config
     fi
     make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) broadcom/${DTBFILE}
+    make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) overlays/${DTBXENO}.dtbo
     if [ ! -s ${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image ]; then
         echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
         make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
@@ -77,6 +80,7 @@ elif [ "${BUILD_ARCH}" == "armhf" ]; then
         make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2711_defconfig xen.config
     fi
     make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) ${DTBFILE}
+    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) overlays/${DTBXENO}.dtbo
     if [ ! -s ${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage ]; then
         echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
         make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) zImage modules dtbs > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
@@ -91,10 +95,13 @@ fi
 
 cp ${WRKDIR}firmware/boot/fixup4*.dat ${WRKDIR}firmware/boot/start4*.elf bootfiles/
 
+mkdir -p bootfiles/overlays
 if [ "${BUILD_ARCH}" == "arm64" ]; then
     cp ${WRKDIR}linux/.build-arm64/arch/arm64/boot/dts/broadcom/${DTBFILE} bootfiles/
+    cp ${WRKDIR}linux/.build-arm64/arch/arm64/boot/dts/overlays/${DTBXENO}.dtbo bootfiles/overlays
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
     cp ${WRKDIR}linux/.build-arm32/arch/arm/boot/dts/${DTBFILE} bootfiles/
+    cp ${WRKDIR}linux/.build-arm32/arch/arm/boot/dts/overlays/${DTBXENO}.dtbo bootfiles/overlays
 fi
 
 cat > bootfiles/cmdline.txt <<EOF
@@ -108,7 +115,7 @@ cat > bootfiles/config.txt <<EOF
 kernel=kernel8.img
 arm_64bit=1
 kernel_address=${XEN_ADDR}
-device_tree=${DTBFILE}
+dtoverlay=${DTBXENO}
 total_mem=1024
 enable_gic=1
 
@@ -144,7 +151,7 @@ elif [ "${BUILD_ARCH}" == "armhf" ]; then
 fi
 
 if [ -d /media/${USER}/boot/ ]; then
-    cp bootfiles/* /media/${USER}/boot/
+    cp -r bootfiles/* /media/${USER}/boot/
     sync
 fi
 
@@ -222,7 +229,7 @@ sudo tar -C ${MNTROOTFS} -xf ${ROOTFS}
 
 mountstuff
 
-sudo cp bootfiles/* ${MNTBOOT}
+sudo cp -r bootfiles/* ${MNTBOOT}
 
 cd ${WRKDIR}linux
 if [ "${BUILD_ARCH}" == "arm64" ]; then

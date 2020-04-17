@@ -1,17 +1,17 @@
-From 758bc9b917469bc4e527dc3aae821c91cbc3d426 Mon Sep 17 00:00:00 2001
+From f59caa29a3f8adca27cf48dd8ad8a6d85ba33489 Mon Sep 17 00:00:00 2001
 From: Stewart Hildebrand <stewart.hildebrand@dornerworks.com>
 Date: Thu, 18 Jul 2019 00:01:27 -0400
-Subject: [PATCH 2/4] Disable DMA in sdhci driver
+Subject: [PATCH 2/3] Disable DMA in sdhci driver
 
 ---
  drivers/mmc/host/sdhci-iproc.c | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index 983cddce9..150f7bfc8 100644
+index 047611ad3..f974cfc82 100644
 --- a/drivers/mmc/host/sdhci-iproc.c
 +++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -252,6 +252,8 @@ static const struct sdhci_iproc_data bcm2835_data = {
+@@ -264,6 +264,8 @@ static const struct sdhci_iproc_data bcm2835_data = {
  
  static const struct sdhci_pltfm_data sdhci_bcm2838_pltfm_data = {
  	.ops = &sdhci_iproc_32only_ops,
