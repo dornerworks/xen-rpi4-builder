@@ -155,7 +155,7 @@ if [ -d /media/${USER}/boot/ ]; then
     sync
 fi
 
-ROOTFS=ubuntu-base-18.04.3-base-${BUILD_ARCH}-prepped.tar.gz
+ROOTFS=ubuntu-base-18.04.5-base-${BUILD_ARCH}-prepped.tar.gz
 if [ ! -s ${ROOTFS} ]; then
     ./ubuntu-base-prep.sh ${BUILD_ARCH}
 fi
