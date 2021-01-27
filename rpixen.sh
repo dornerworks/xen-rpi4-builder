@@ -8,8 +8,8 @@
 WRKDIR=$(pwd)/
 SCRIPTDIR=$(cd $(dirname $0) && pwd)/
 
-USERNAME=dornerworks
-PASSWORD=dornerworks
+USERNAME=pi
+PASSWORD=raspberry
 SALT=dw
 HASHED_PASSWORD=$(perl -e "print crypt(\"${PASSWORD}\",\"${SALT}\");")
 HOSTNAME=ubuntu
@@ -207,7 +207,7 @@ trap finish EXIT
 sudo mkdir -p ${MNTRAMDISK}
 sudo mount -t tmpfs -o size=3g tmpfs ${MNTRAMDISK}
 
-qemu-img create ${IMGFILE} 2048M
+qemu-img create ${IMGFILE} 4096M
 /sbin/parted ${IMGFILE} --script -- mklabel msdos
 /sbin/parted ${IMGFILE} --script -- mkpart primary fat32 2048s 264191s
 /sbin/parted ${IMGFILE} --script -- mkpart primary ext4 264192s -1s
