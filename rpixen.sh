@@ -13,6 +13,7 @@ PASSWORD=dornerworks
 SALT=dw
 HASHED_PASSWORD=$(perl -e "print crypt(\"${PASSWORD}\",\"${SALT}\");")
 HOSTNAME=ubuntu
+UBUNTUVERSION="20.04.1"
 
 BUILD_ARCH=${1:-arm64}
 
@@ -35,19 +36,15 @@ if [ ! -d firmware ]; then
 fi
 
 if [ ! -d xen ]; then
-    git clone git://xenbits.xen.org/xen.git
-    cd xen
-    git checkout RELEASE-4.13.0
-    cd ${WRKDIR}
+    git clone --depth=1 --branch RELEASE-4.14.1 git://xenbits.xen.org/xen.git
 fi
 
 if [ ! -d linux ]; then
-    git clone --depth 1 --branch rpi-4.19.y https://github.com/raspberrypi/linux.git linux
+    git clone --depth 1 --branch rpi-5.10.y https://github.com/raspberrypi/linux.git linux
     cd linux
-    git am ${SCRIPTDIR}patches/linux/*.patch
+    git am ${SCRIPTDIR}patches/linux/0001*.patch
     cd ${WRKDIR}
 fi
-
 
 # Build xen
 if [ ! -s ${WRKDIR}xen/xen/xen ]; then
@@ -55,9 +52,9 @@ if [ ! -s ${WRKDIR}xen/xen/xen ]; then
     if [ ! -s xen/.config ]; then
         echo "CONFIG_DEBUG=y" > xen/arch/arm/configs/arm64_defconfig
         echo "CONFIG_SCHED_ARINC653=y" >> xen/arch/arm/configs/arm64_defconfig
-        make -C xen XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 defconfig
+        make -C xen XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 defconfig
     fi
-    make XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 dist-xen -j $(nproc)
+    make XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- dist-xen -j $(nproc)
     cd ${WRKDIR}
 fi
 
@@ -66,24 +63,24 @@ cd ${WRKDIR}linux
 if [ "${BUILD_ARCH}" == "arm64" ]; then
     if [ ! -s ${WRKDIR}linux/.build-arm64/.config ]; then
         # utilize kernel/configs/xen.config fragment
-        make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig xen.config
+        make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- bcm2711_defconfig xen.config
     fi
-    make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) broadcom/${DTBFILE}
-    make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) overlays/${DTBXENO}.dtbo
+    make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- -j $(nproc) broadcom/${DTBFILE}
+    make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- -j $(nproc) overlays/${DTBXENO}.dtbo
     if [ ! -s ${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image ]; then
         echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
-        make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
+        make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- -j $(nproc) > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
     fi
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
     if [ ! -s ${WRKDIR}linux/.build-arm32/.config ]; then
         # utilize kernel/configs/xen.config fragment
-        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2711_defconfig xen.config
+        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- bcm2711_defconfig xen.config
     fi
-    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) ${DTBFILE}
-    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) overlays/${DTBXENO}.dtbo
+    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- -j $(nproc) ${DTBFILE}
+    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- -j $(nproc) overlays/${DTBXENO}.dtbo
     if [ ! -s ${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage ]; then
         echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
-        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j $(nproc) zImage modules dtbs > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
+        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- -j $(nproc) zImage modules dtbs > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
     fi
 fi
 cd ${WRKDIR}
@@ -155,9 +152,9 @@ if [ -d /media/${USER}/boot/ ]; then
     sync
 fi
 
-ROOTFS=ubuntu-base-18.04.5-base-${BUILD_ARCH}-prepped.tar.gz
+ROOTFS=ubuntu-base-${UBUNTUVERSION}-base-${BUILD_ARCH}-prepped.tar.gz
 if [ ! -s ${ROOTFS} ]; then
-    ./ubuntu-base-prep.sh ${BUILD_ARCH}
+    ./ubuntu-base-prep.sh ${BUILD_ARCH} ${UBUNTUVERSION}
 fi
 
 
@@ -243,15 +240,17 @@ cd ${WRKDIR}
 # Build Xen tools
 
 if [ "${BUILD_ARCH}" == "arm64" ]; then
-    CROSS_PREFIX=aarch64-linux-gnu
+    LIB_PREFIX=aarch64-linux-gnu
+    CROSS_PREFIX=aarch64-none-linux-gnu
     XEN_ARCH=arm64
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
-    CROSS_PREFIX=arm-linux-gnueabihf
+    LIB_PREFIX=arm-linux-gnueabihf
+    CROSS_PREFIX=arm-none-linux-gnueabihf
     XEN_ARCH=arm32
 fi
 
 # Change the shared library symlinks to relative instead of absolute so they play nice with cross-compiling
-sudo chroot ${MNTROOTFS} symlinks -c /usr/lib/${CROSS_PREFIX}/
+sudo chroot ${MNTROOTFS} symlinks -c /usr/lib/${LIB_PREFIX}/
 
 cd ${WRKDIR}xen
 
@@ -261,21 +260,23 @@ cd ${WRKDIR}xen
 SYSINCDIRS=$(echo $(sudo chroot ${MNTROOTFS} bash -c "echo | gcc -E -Wp,-v -o /dev/null - 2>&1" | grep "^ " | sed "s|^ /| -isystem${MNTROOTFS}|"))
 SYSINCDIRSCXX=$(echo $(sudo chroot ${MNTROOTFS} bash -c "echo | g++ -x c++ -E -Wp,-v -o /dev/null - 2>&1" | grep "^ " | sed "s|^ /| -isystem${MNTROOTFS}|"))
 
-CC="${CROSS_PREFIX}-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTROOTFS}lib/${CROSS_PREFIX} -B${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
-CXX="${CROSS_PREFIX}-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/${CROSS_PREFIX} -B${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
-LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/${CROSS_PREFIX} -Wl,-rpath-link=${MNTROOTFS}usr/lib/${CROSS_PREFIX}"
+CC="${CROSS_PREFIX}-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTROOTFS}lib/${LIB_PREFIX} -B${MNTROOTFS}usr/lib/${LIB_PREFIX}"
+CXX="${CROSS_PREFIX}-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/${LIB_PREFIX} -B${MNTROOTFS}usr/lib/${LIB_PREFIX}"
+LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/${LIB_PREFIX} -Wl,-rpath-link=${MNTROOTFS}usr/lib/${LIB_PREFIX}"
 
 PKG_CONFIG=pkg-config \
-PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${LIB_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
 PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
 ./configure \
     PYTHON_PREFIX_ARG=--install-layout=deb \
+    --with-system-qemu=/usr/bin/qemu-system-i386 \
     --enable-systemd \
     --disable-xen \
     --enable-tools \
     --disable-docs \
     --disable-stubdom \
+    --disable-golang \
     --prefix=/usr \
     --with-xenstored=xenstored \
     --build=x86_64-linux-gnu \
@@ -284,7 +285,7 @@ LDFLAGS="${LDFLAGS}" \
     CXX="${CXX}"
 
 PKG_CONFIG=pkg-config \
-PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${LIB_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
 PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
 make dist-tools \
@@ -295,7 +296,7 @@ make dist-tools \
 
 sudo --preserve-env PATH=${PATH} \
 PKG_CONFIG=pkg-config \
-PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${CROSS_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
+PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${LIB_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
 PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
 make install-tools \
@@ -374,3 +375,5 @@ sudo chroot ${MNTROOTFS} useradd -s /bin/bash -G adm,sudo -l -m -p ${HASHED_PASS
 sudo chroot ${MNTROOTFS} /bin/bash -euxc "echo \"${USERNAME} ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/90-${USERNAME}-user"
 
 df -h | grep -e "Filesystem" -e "/dev/mapper/loop"
+
+echo "Script completed successfully"

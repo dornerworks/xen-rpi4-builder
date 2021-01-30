@@ -1,27 +1,23 @@
-From 3f1b2f3fa037b69ee85becf014ecf4a640829d49 Mon Sep 17 00:00:00 2001
-From: Corey Minyard <cminyard@mvista.com>
-Date: Fri, 17 Apr 2020 09:54:43 -0500
-Subject: [PATCH 1/3] Add Xen overlay for the Pi 4
+From 000cc51b72e9817cb531b2bfe7de6d2286293b87 Mon Sep 17 00:00:00 2001
+Message-Id: <000cc51b72e9817cb531b2bfe7de6d2286293b87.1612033105.git.tamas@tklengyel.com>
+From: Tamas K Lengyel <tamas@tklengyel.com>
+Date: Sat, 30 Jan 2021 11:58:23 -0700
+Subject: [PATCH]  Add Xen overlay for the Pi 4
 
-Signed-off-by: Corey Minyard <cminyard@mvista.com>
 ---
- arch/arm/boot/dts/overlays/Makefile           |  4 ++-
- .../boot/dts/overlays/pi4-32-xen-overlay.dts  | 28 +++++++++++++++++++
- .../boot/dts/overlays/pi4-64-xen-overlay.dts  | 28 +++++++++++++++++++
- 3 files changed, 59 insertions(+), 1 deletion(-)
- create mode 100644 arch/arm/boot/dts/overlays/pi4-32-xen-overlay.dts
- create mode 100644 arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts
+ arch/arm/boot/dts/overlays/Makefile | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/boot/dts/overlays/Makefile b/arch/arm/boot/dts/overlays/Makefile
-index d2e66ab46de5..54625e59299a 100644
+index b8675fb47..3e8ee64df 100644
 --- a/arch/arm/boot/dts/overlays/Makefile
 +++ b/arch/arm/boot/dts/overlays/Makefile
-@@ -195,7 +195,9 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
- 	w1-gpio.dtbo \
+@@ -214,7 +214,9 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
  	w1-gpio-pullup.dtbo \
  	w5500.dtbo \
--	wittypi.dtbo
-+	wittypi.dtbo \
+ 	wittypi.dtbo \
+-	wm8960-soundcard.dtbo
++	wm8960-soundcard.dtbo \
 +	pi4-32-xen.dtbo \
 +	pi4-64-xen.dtbo
  
@@ -45,7 +41,7 @@ index 000000000..f021d03c2
 +        __overlay__ {
 +	    #address-cells = <0x1>;
 +	    #size-cells = <0x1>;
-+	    xen,xen-bootargs = "console=dtuart dtuart=/soc/serial@7e215040 sync_console dom0_mem=512M dom0_mem=512M bootscrub=0";
++	    xen,xen-bootargs = "console=dtuart dtuart=/soc/serial@7e215040 sync_console dom0_mem=512M bootscrub=0";
 +
 +	    dom0 {
 +		compatible = "xen,linux-zimage", "xen,multiboot-module";
@@ -96,5 +92,5 @@ index 000000000..68497c300
 +    };
 +};
 -- 
-2.17.1
+2.25.1
 

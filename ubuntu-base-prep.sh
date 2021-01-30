@@ -7,12 +7,13 @@
 
 WRKDIR=$(pwd)/
 ARCH=${1:-arm64}
+UBUNTUVERSION=${2:-20.04.1}
 
 sudo apt install qemu-user-static
 
 # Download Ubuntu Base file system (https://wiki.ubuntu.com/Base)
-ROOTFSURL=http://cdimage.ubuntu.com/ubuntu-base/releases/18.04.5/release/
-ROOTFS=ubuntu-base-18.04.5-base-${ARCH}.tar.gz
+ROOTFSURL=http://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTUVERSION}/release/
+ROOTFS=ubuntu-base-${UBUNTUVERSION}-base-${ARCH}.tar.gz
 if [ ! -s ${ROOTFS} ]; then
     curl -OLf ${ROOTFSURL}${ROOTFS}
 fi
@@ -20,7 +21,7 @@ fi
 MNTRAMDISK=/mnt/ramdisk/
 MNTROOTFS=${MNTRAMDISK}qemu-${ARCH}-rootfs/
 
-IMGFILE=ubuntu-base-18.04.5-base-${ARCH}-prepped.tar.gz
+IMGFILE=ubuntu-base-${UBUNTUVERSION}-base-${ARCH}-prepped.tar.gz
 
 if [ -s ${IMGFILE} ]; then
     ROOTFS=${IMGFILE}
@@ -84,7 +85,7 @@ sudo chroot ${MNTROOTFS} apt-get update
 # Install the dialog package and others first to squelch some warnings
 sudo chroot ${MNTROOTFS} apt-get -y install dialog apt-utils
 sudo chroot ${MNTROOTFS} apt-get -y upgrade
-sudo chroot ${MNTROOTFS} apt-get -y install systemd systemd-sysv sysvinit-utils sudo udev rsyslog kmod util-linux sed netbase dnsutils ifupdown isc-dhcp-client isc-dhcp-common less nano vim net-tools iproute2 iputils-ping libnss-mdns iw software-properties-common ethtool dmsetup hostname iptables logrotate lsb-base lsb-release plymouth psmisc tar tcpd libsystemd-dev symlinks uuid-dev libc6-dev libncurses-dev libglib2.0-dev build-essential bridge-utils zlib1g-dev patch libpixman-1-dev libyajl-dev libfdt-dev libaio-dev git libusb-1.0-0-dev libpulse-dev libcapstone-dev libnl-route-3-dev openssh-sftp-server
+sudo chroot ${MNTROOTFS} apt-get -y install systemd systemd-sysv sysvinit-utils sudo udev rsyslog kmod util-linux sed netbase dnsutils ifupdown isc-dhcp-client isc-dhcp-common less nano vim net-tools iproute2 iputils-ping libnss-mdns iw software-properties-common ethtool dmsetup hostname iptables logrotate lsb-base lsb-release plymouth psmisc tar tcpd libsystemd-dev symlinks uuid-dev libc6-dev libncurses-dev libglib2.0-dev build-essential bridge-utils zlib1g-dev patch libpixman-1-dev libyajl-dev libfdt-dev libaio-dev git libusb-1.0-0-dev libpulse-dev libcapstone-dev libnl-route-3-dev openssh-sftp-server qemu-system-x86
 sudo chroot ${MNTROOTFS} apt-get clean
 sudo cp regenerate_ssh_host_keys.service ${MNTROOTFS}etc/systemd/system
 sudo chroot ${MNTROOTFS} systemctl enable regenerate_ssh_host_keys.service
