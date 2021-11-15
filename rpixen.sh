@@ -20,12 +20,12 @@ BUILD_ARCH=${1:-arm64}
 sudo apt install device-tree-compiler tftpd-hpa flex bison qemu-utils kpartx git curl qemu-user-static binfmt-support parted bc libncurses5-dev libssl-dev pkg-config python acpica-tools wget
 
 source ${SCRIPTDIR}toolchain-aarch64-linux-gnu.sh
-source ${SCRIPTDIR}toolchain-arm-linux-gnueabihf.sh
 
 DTBFILE=bcm2711-rpi-4-b.dtb
 if [ "${BUILD_ARCH}" == "arm64" ]; then
     DTBXENO=pi4-64-xen
 else
+    source ${SCRIPTDIR}toolchain-arm-linux-gnueabihf.sh
     DTBXENO=pi4-32-xen
 fi
 XEN_ADDR=0x00200000
