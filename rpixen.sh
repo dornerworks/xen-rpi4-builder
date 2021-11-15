@@ -84,13 +84,13 @@ if [ "${BUILD_ARCH}" == "arm64" ]; then
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
     if [ ! -s ${WRKDIR}linux/.build-arm32/.config ]; then
         # utilize kernel/configs/xen.config fragment
-        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- bcm2711_defconfig xen.config
+        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- bcm2711_defconfig xen.config
     fi
-    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- -j $(nproc) ${DTBFILE}
-    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- -j $(nproc) overlays/${DTBXENO}.dtbo
+    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- -j $(nproc) ${DTBFILE}
+    make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- -j $(nproc) overlays/${DTBXENO}.dtbo
     if [ ! -s ${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage ]; then
         echo "Building kernel. This takes a while. To monitor progress, open a new terminal and use \"tail -f buildoutput.log\""
-        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-none-gnueabihf- -j $(nproc) zImage modules dtbs > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
+        make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- -j $(nproc) zImage modules dtbs > ${WRKDIR}buildoutput.log 2> ${WRKDIR}buildoutput2.log
     fi
 fi
 cd ${WRKDIR}
@@ -240,9 +240,9 @@ sudo cp -r bootfiles/* ${MNTBOOT}
 
 cd ${WRKDIR}linux
 if [ "${BUILD_ARCH}" == "arm64" ]; then
-    sudo --preserve-env PATH=${PATH} make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
+    sudo --preserve-env PATH=${PATH} make O=.build-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
-    sudo --preserve-env PATH=${PATH} make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
+    sudo --preserve-env PATH=${PATH} make O=.build-arm32 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- INSTALL_MOD_PATH=${MNTROOTFS} modules_install > ${WRKDIR}modules_install.log
 fi
 cd ${WRKDIR}
 

@@ -21,18 +21,18 @@ if ! which ccache > /dev/null; then
     sudo apt install ccache
 fi
 
-if [ ! -h /usr/lib/ccache/arm-linux-gnueabihf-gcc ]; then
-    sudo ln -s ../../bin/ccache /usr/lib/ccache/arm-linux-gnueabihf-gcc
+if [ ! -h /usr/lib/ccache/arm-none-linux-gnueabihf-gcc ]; then
+    sudo ln -s ../../bin/ccache /usr/lib/ccache/arm-none-linux-gnueabihf-gcc
 fi
 
-if [ ! -h /usr/lib/ccache/arm-linux-gnueabihf-g++ ]; then
-    sudo ln -s ../../bin/ccache /usr/lib/ccache/arm-linux-gnueabihf-g++
+if [ ! -h /usr/lib/ccache/arm-none-linux-gnueabihf-g++ ]; then
+    sudo ln -s ../../bin/ccache /usr/lib/ccache/arm-none-linux-gnueabihf-g++
 fi
 
 
 if [ -z "${ARM32_TOOLCHAIN_VERSION-}" ]; then
 
-    ARM32_TOOLCHAIN_VERSION="10.2-2020.11"
+    ARM32_TOOLCHAIN_VERSION="9.2-2019.12"
     ARM32_TOOLCHAIN_FILENAME=gcc-arm-${ARM32_TOOLCHAIN_VERSION}-x86_64-arm-none-linux-gnueabihf
 
     if [ ! -d ${ARM32_TOOLCHAIN_SCRIPTDIR}${ARM32_TOOLCHAIN_FILENAME} ]; then

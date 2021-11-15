@@ -9,8 +9,8 @@
 /gcc-linaro-*-x86_64_aarch64-*/
 /gcc-arm-*-x86_64-aarch64-*.tar.xz
 /gcc-arm-*-x86_64-aarch64-*/
-/gcc-arm-*-x86_64-arm-linux-gnueabihf.tar.xz
-/gcc-arm-*-x86_64-arm-linux-gnueabihf/
+/gcc-arm-*-x86_64-arm-*.tar.xz
+/gcc-arm-*-x86_64-arm-*/
 /arm-trusted-firmware/
 /bootfiles/
 /*.log

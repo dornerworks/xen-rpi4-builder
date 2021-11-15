@@ -21,18 +21,18 @@ if ! which ccache > /dev/null; then
     sudo apt install ccache
 fi
 
-if [ ! -h /usr/lib/ccache/aarch64-linux-gnu-gcc ]; then
-    sudo ln -s ../../bin/ccache /usr/lib/ccache/aarch64-linux-gnu-gcc
+if [ ! -h /usr/lib/ccache/aarch64-none-linux-gnu-gcc ]; then
+    sudo ln -s ../../bin/ccache /usr/lib/ccache/aarch64-none-linux-gnu-gcc
 fi
 
-if [ ! -h /usr/lib/ccache/aarch64-linux-gnu-g++ ]; then
-    sudo ln -s ../../bin/ccache /usr/lib/ccache/aarch64-linux-gnu-g++
+if [ ! -h /usr/lib/ccache/aarch64-none-linux-gnu-g++ ]; then
+    sudo ln -s ../../bin/ccache /usr/lib/ccache/aarch64-none-linux-gnu-g++
 fi
 
 
 if [ -z "${ARM64_TOOLCHAIN_VERSION-}" ]; then
 
-    ARM64_TOOLCHAIN_VERSION="10.2-2020.11"
+    ARM64_TOOLCHAIN_VERSION="9.2-2019.12"
     ARM64_TOOLCHAIN_FILENAME=gcc-arm-${ARM64_TOOLCHAIN_VERSION}-x86_64-aarch64-none-linux-gnu
 
     if [ ! -d ${ARM64_TOOLCHAIN_SCRIPTDIR}${ARM64_TOOLCHAIN_FILENAME} ]; then
