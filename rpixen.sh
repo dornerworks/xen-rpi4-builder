@@ -13,7 +13,7 @@ PASSWORD=dornerworks
 SALT=dw
 HASHED_PASSWORD=$(perl -e "print crypt(\"${PASSWORD}\",\"${SALT}\");")
 HOSTNAME=ubuntu
-UBUNTUVERSION="20.04.1"
+UBUNTUVERSION="20.04.3"
 
 BUILD_ARCH=${1:-arm64}
 

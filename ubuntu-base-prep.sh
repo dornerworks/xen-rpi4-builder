@@ -7,7 +7,7 @@
 
 WRKDIR=$(pwd)/
 ARCH=${1:-arm64}
-UBUNTUVERSION=${2:-20.04.1}
+UBUNTUVERSION=${2:-20.04.3}
 
 sudo apt install qemu-user-static
 
