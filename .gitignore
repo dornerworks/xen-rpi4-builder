@@ -1,6 +1,6 @@
 /firmware/
-/linux/
-/xen/
+/linux
+/xen
 /openocd/
 /qemu/
 /*.img
