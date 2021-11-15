@@ -17,7 +17,7 @@ UBUNTUVERSION="20.04.1"
 
 BUILD_ARCH=${1:-arm64}
 
-sudo apt install device-tree-compiler tftpd-hpa flex bison qemu-utils kpartx git curl qemu-user-static binfmt-support parted bc libncurses5-dev libssl-dev pkg-config python acpica-tools
+sudo apt install device-tree-compiler tftpd-hpa flex bison qemu-utils kpartx git curl qemu-user-static binfmt-support parted bc libncurses5-dev libssl-dev pkg-config python acpica-tools wget
 
 source ${SCRIPTDIR}toolchain-aarch64-linux-gnu.sh
 source ${SCRIPTDIR}toolchain-arm-linux-gnueabihf.sh
@@ -32,7 +32,17 @@ XEN_ADDR=0x00200000
 
 # Clone sources
 if [ ! -d firmware ]; then
-    git clone --depth 1 https://github.com/raspberrypi/firmware.git
+    mkdir -p firmware/boot
+    cd firmware/boot
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/fixup4.dat
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/fixup4cd.dat
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/fixup4db.dat
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/fixup4x.dat
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/start4.elf
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/start4cd.elf
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/start4db.elf
+    wget https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/start4x.elf
+    cd ${WRKDIR}
 fi
 
 if [ ! -d xen ]; then
