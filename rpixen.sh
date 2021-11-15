@@ -52,7 +52,7 @@ fi
 if [ ! -d linux ]; then
     git clone --depth 1 --branch rpi-5.10.y https://github.com/raspberrypi/linux.git linux
     cd linux
-    git am ${SCRIPTDIR}patches/linux/0001*.patch
+    git am ${SCRIPTDIR}patches/linux/*.patch
     cd ${WRKDIR}
 fi
 
