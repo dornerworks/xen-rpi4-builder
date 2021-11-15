@@ -46,7 +46,7 @@ if [ ! -d firmware ]; then
 fi
 
 if [ ! -d xen ]; then
-    git clone --depth=1 --branch RELEASE-4.14.1 git://xenbits.xen.org/xen.git
+    git clone --depth=1 --branch RELEASE-4.15.1 git://xenbits.xen.org/xen.git
 fi
 
 if [ ! -d linux ]; then
