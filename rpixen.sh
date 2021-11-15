@@ -60,9 +60,14 @@ fi
 if [ ! -s ${WRKDIR}xen/xen/xen ]; then
     cd ${WRKDIR}xen
     if [ ! -s xen/.config ]; then
-        echo "CONFIG_DEBUG=y" > xen/arch/arm/configs/arm64_defconfig
-        echo "CONFIG_SCHED_ARINC653=y" >> xen/arch/arm/configs/arm64_defconfig
-        make -C xen XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- CONFIG_EARLY_PRINTK=8250,0xfe215040,2 defconfig
+        cat > xen/arch/arm/configs/rpi4_defconfig << EOF
+CONFIG_DEBUG=y
+CONFIG_SCHED_ARINC653=y
+CONFIG_EARLY_UART_CHOICE_8250=y
+CONFIG_EARLY_UART_BASE_ADDRESS=0xfe215040
+CONFIG_EARLY_UART_8250_REG_SHIFT=2
+EOF
+        make -C xen XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- rpi4_defconfig
     fi
     make XEN_TARGET_ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- dist-xen -j $(nproc)
     cd ${WRKDIR}
