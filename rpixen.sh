@@ -216,8 +216,9 @@ sudo mount -t tmpfs -o size=3g tmpfs ${MNTRAMDISK}
 
 qemu-img create ${IMGFILE} 2048M
 /sbin/parted ${IMGFILE} --script -- mklabel msdos
-/sbin/parted ${IMGFILE} --script -- mkpart primary fat32 2048s 264191s
-/sbin/parted ${IMGFILE} --script -- mkpart primary ext4 264192s -1s
+MB_TO_SECTOR=2048
+/sbin/parted ${IMGFILE} --script -- mkpart primary fat32 $(( 1 * ${MB_TO_SECTOR} ))s $(( 129 * ${MB_TO_SECTOR} - 1 ))s
+/sbin/parted ${IMGFILE} --script -- mkpart primary ext4 $(( 129 * ${MB_TO_SECTOR} ))s -1025s
 
 LOOPDEVS=$(sudo kpartx -avs ${IMGFILE} | awk '{print $3}')
 LOOPDEVBOOT=/dev/mapper/$(echo ${LOOPDEVS} | awk '{print $1}')
