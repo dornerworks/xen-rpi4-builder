@@ -146,18 +146,18 @@ enable_uart=1
 init_uart_baud=115200
 EOF
 
-# 18MiB worth of zeros
-dd if=/dev/zero of=bootfiles/kernel8.img bs=1024 count=18432
+# 26MiB worth of zeros
+dd if=/dev/zero of=bootfiles/kernel8.img bs=1024 count=26624
 
 # Assuming xen is less than 2MiB in size
 dd if=${WRKDIR}xen/xen/xen of=bootfiles/kernel8.img bs=1024 conv=notrunc
 
 if [ "${BUILD_ARCH}" == "arm64" ]; then
-    # Assuming linux is less than 15.5MiB in size
+    # Assuming linux is less than 23.5MiB in size
     # Image is offset by 2.5MiB from the beginning of the file
     dd if=${WRKDIR}linux/.build-arm64/arch/arm64/boot/Image of=bootfiles/kernel8.img bs=1024 seek=2560 conv=notrunc
 elif [ "${BUILD_ARCH}" == "armhf" ]; then
-    # Assuming linux is less than 16MiB in size
+    # Assuming linux is less than 24MiB in size
     # Image is offset by 2MiB from the beginning of the file
     dd if=${WRKDIR}linux/.build-arm32/arch/arm/boot/zImage of=bootfiles/kernel8.img bs=1024 seek=2048 conv=notrunc
 fi

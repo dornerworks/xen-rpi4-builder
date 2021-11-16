@@ -1,18 +1,21 @@
-From 000cc51b72e9817cb531b2bfe7de6d2286293b87 Mon Sep 17 00:00:00 2001
-Message-Id: <000cc51b72e9817cb531b2bfe7de6d2286293b87.1612033105.git.tamas@tklengyel.com>
-From: Tamas K Lengyel <tamas@tklengyel.com>
-Date: Sat, 30 Jan 2021 11:58:23 -0700
-Subject: [PATCH]  Add Xen overlay for the Pi 4
+From: Corey Minyard <cminyard@mvista.com>
+Date: Wed, 17 Nov 2021 12:41:32 -0500
+Subject: [PATCH] Add Xen overlay for the Pi 4
 
+Signed-off-by: Corey Minyard <cminyard@mvista.com>
 ---
- arch/arm/boot/dts/overlays/Makefile | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ arch/arm/boot/dts/overlays/Makefile           |  4 +++-
+ .../boot/dts/overlays/pi4-32-xen-overlay.dts  | 21 +++++++++++++++++++
+ .../boot/dts/overlays/pi4-64-xen-overlay.dts  | 21 +++++++++++++++++++
+ 3 files changed, 45 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/boot/dts/overlays/pi4-32-xen-overlay.dts
+ create mode 100644 arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts
 
 diff --git a/arch/arm/boot/dts/overlays/Makefile b/arch/arm/boot/dts/overlays/Makefile
-index b8675fb47..3e8ee64df 100644
+index a6b0d9ea0385..4cfe5885eca1 100644
 --- a/arch/arm/boot/dts/overlays/Makefile
 +++ b/arch/arm/boot/dts/overlays/Makefile
-@@ -214,7 +214,9 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
+@@ -244,7 +244,9 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
  	w1-gpio-pullup.dtbo \
  	w5500.dtbo \
  	wittypi.dtbo \
@@ -25,10 +28,10 @@ index b8675fb47..3e8ee64df 100644
  targets += $(dtbo-y)
 diff --git a/arch/arm/boot/dts/overlays/pi4-32-xen-overlay.dts b/arch/arm/boot/dts/overlays/pi4-32-xen-overlay.dts
 new file mode 100644
-index 000000000..f021d03c2
+index 000000000000..47afa6ac24b7
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlays/pi4-32-xen-overlay.dts
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,21 @@
 +// Xen configuration for Pi 4
 +/dts-v1/;
 +/plugin/;
@@ -39,30 +42,23 @@ index 000000000..f021d03c2
 +    fragment@0 {
 +        target-path = "/chosen";
 +        __overlay__ {
-+	    #address-cells = <0x1>;
-+	    #size-cells = <0x1>;
-+	    xen,xen-bootargs = "console=dtuart dtuart=/soc/serial@7e215040 sync_console dom0_mem=512M bootscrub=0";
++            #address-cells = <0x1>;
++            #size-cells = <0x1>;
++            xen,xen-bootargs = "console=dtuart dtuart=/soc/serial@7e215040 sync_console dom0_mem=512M dom0_max_vcpus=1 bootscrub=0";
 +
-+	    dom0 {
-+		compatible = "xen,linux-zimage", "xen,multiboot-module";
-+		reg = <0x00400000 0x01000000>;
-+	    };
++            dom0 {
++                compatible = "xen,linux-zimage", "xen,multiboot-module";
++                reg = <0x00400000 0x01800000>;
++            };
 +        };
-+    };
-+
-+    fragment@1 {
-+        target-path = "/scb/pcie@7d500000";
-+        __overlay__ {
-+	    device_type = "pci";
-+	};
 +    };
 +};
 diff --git a/arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts b/arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts
 new file mode 100644
-index 000000000..68497c300
+index 000000000000..362e238576bf
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,21 @@
 +// Xen configuration for Pi 4
 +/dts-v1/;
 +/plugin/;
@@ -73,24 +69,17 @@ index 000000000..68497c300
 +    fragment@0 {
 +        target-path = "/chosen";
 +        __overlay__ {
-+	    #address-cells = <0x1>;
-+	    #size-cells = <0x1>;
-+	    xen,xen-bootargs = "console=dtuart dtuart=/soc/serial@7e215040 sync_console dom0_mem=512M bootscrub=0";
++            #address-cells = <0x1>;
++            #size-cells = <0x1>;
++            xen,xen-bootargs = "console=dtuart dtuart=/soc/serial@7e215040 sync_console dom0_mem=512M bootscrub=0";
 +
-+	    dom0 {
-+		compatible = "xen,linux-zimage", "xen,multiboot-module";
-+		reg = <0x00480000 0x00f80000>;
-+	    };
++            dom0 {
++                compatible = "xen,linux-zimage", "xen,multiboot-module";
++                reg = <0x00480000 0x01780000>;
++            };
 +        };
-+    };
-+
-+    fragment@1 {
-+        target-path = "/scb/pcie@7d500000";
-+        __overlay__ {
-+	    device_type = "pci";
-+	};
 +    };
 +};
 -- 
-2.25.1
+2.34.0
 
