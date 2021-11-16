@@ -284,8 +284,8 @@ PKG_CONFIG=pkg-config \
 PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${LIB_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
 PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
+PYTHON=${MNTROOTFS}/usr/bin/python3 \
 ./configure \
-    PYTHON_PREFIX_ARG=--install-layout=deb \
     --with-system-qemu=/usr/bin/qemu-system-i386 \
     --enable-systemd \
     --disable-xen \
