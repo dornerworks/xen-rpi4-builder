@@ -279,7 +279,6 @@ CC="${CROSS_PREFIX}-gcc --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRS} -B${MNTRO
 CXX="${CROSS_PREFIX}-g++ --sysroot=${MNTROOTFS} -nostdinc ${SYSINCDIRSCXX} -B${MNTROOTFS}lib/${LIB_PREFIX} -B${MNTROOTFS}usr/lib/${LIB_PREFIX}"
 LDFLAGS="-Wl,-rpath-link=${MNTROOTFS}lib/${LIB_PREFIX} -Wl,-rpath-link=${MNTROOTFS}usr/lib/${LIB_PREFIX}"
 
-PKG_CONFIG=pkg-config \
 PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${LIB_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
 PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
@@ -299,7 +298,6 @@ PYTHON=${MNTROOTFS}/usr/bin/python3 \
     CC="${CC}" \
     CXX="${CXX}"
 
-PKG_CONFIG=pkg-config \
 PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${LIB_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
 PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
@@ -310,7 +308,6 @@ make dist-tools \
     -j $(nproc)
 
 sudo --preserve-env PATH=${PATH} \
-PKG_CONFIG=pkg-config \
 PKG_CONFIG_LIBDIR=${MNTROOTFS}usr/lib/${LIB_PREFIX}/pkgconfig:${MNTROOTFS}usr/share/pkgconfig \
 PKG_CONFIG_SYSROOT_DIR=${MNTROOTFS} \
 LDFLAGS="${LDFLAGS}" \
