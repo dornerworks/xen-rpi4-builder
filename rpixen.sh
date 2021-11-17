@@ -1,9 +1,16 @@
-#!/bin/bash -eux
+#!/bin/bash -Eeux
+set -o pipefail
 
 # SPDX-License-Identifier: MIT
 
 # Copyright (c) 2019, DornerWorks, Ltd.
 # Author: Stewart Hildebrand
+
+fail_handler () {
+    BUILDLINE="$1"
+}
+
+trap 'fail_handler ${LINENO}' ERR
 
 WRKDIR=$(pwd)/
 SCRIPTDIR=$(cd $(dirname $0) && pwd)/
@@ -202,14 +209,25 @@ mountstuff () {
 }
 
 finish () {
+  STATUS="$?"
+  trap - ERR
+  set +e
   cd ${WRKDIR}
   sudo sync
+
   unmountstuff
   sudo kpartx -dvs ${IMGFILE} || true
   sudo rmdir ${MNTROOTFS} || true
-  mv ${IMGFILE} . || true
+  if [ "$STATUS" == "0" ]; then
+    mv ${IMGFILE} . || true
+    echo "=== BUILD SUCCEEDED ==="
+  else
+    rm ${IMGFILE} || true
+    echo "=== BUILD ERROR on line ${BUILDLINE} ==="
+  fi
   sudo umount ${MNTRAMDISK} || true
   sudo rmdir ${MNTRAMDISK} || true
+  exit $STATUS
 }
 
 trap finish EXIT

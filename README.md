@@ -7,6 +7,7 @@ Usage:
 
     $ ./rpixen.sh
 
+Ensure that the script prints the message "=== BUILD SUCCEEDED ===".
 When the script is finished, flash to SD card with (for example):
 
     $ umount /dev/sdX1
