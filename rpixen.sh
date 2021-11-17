@@ -128,7 +128,6 @@ kernel=kernel8.img
 arm_64bit=1
 kernel_address=${XEN_ADDR}
 dtoverlay=${DTBXENO}
-total_mem=1024
 enable_gic=1
 
 #disable_overscan=1
