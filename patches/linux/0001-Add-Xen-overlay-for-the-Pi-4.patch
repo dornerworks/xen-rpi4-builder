@@ -4,10 +4,10 @@ Subject: [PATCH] Add Xen overlay for the Pi 4
 
 Signed-off-by: Corey Minyard <cminyard@mvista.com>
 ---
- arch/arm/boot/dts/overlays/Makefile           |  4 +++-
- .../boot/dts/overlays/pi4-32-xen-overlay.dts  | 21 +++++++++++++++++++
- .../boot/dts/overlays/pi4-64-xen-overlay.dts  | 21 +++++++++++++++++++
- 3 files changed, 45 insertions(+), 1 deletion(-)
+ arch/arm/boot/dts/overlays/Makefile           |  4 +-
+ .../boot/dts/overlays/pi4-32-xen-overlay.dts  | 21 ++++++++++
+ .../boot/dts/overlays/pi4-64-xen-overlay.dts  | 39 +++++++++++++++++++
+ 3 files changed, 63 insertions(+), 1 deletion(-)
  create mode 100644 arch/arm/boot/dts/overlays/pi4-32-xen-overlay.dts
  create mode 100644 arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts
 
@@ -55,10 +55,10 @@ index 000000000000..47afa6ac24b7
 +};
 diff --git a/arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts b/arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts
 new file mode 100644
-index 000000000000..362e238576bf
+index 000000000000..6c499a831db6
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlays/pi4-64-xen-overlay.dts
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,39 @@
 +// Xen configuration for Pi 4
 +/dts-v1/;
 +/plugin/;
@@ -76,6 +76,24 @@ index 000000000000..362e238576bf
 +            dom0 {
 +                compatible = "xen,linux-zimage", "xen,multiboot-module";
 +                reg = <0x00480000 0x01780000>;
++            };
++        };
++    };
++
++    /* Introduce a dummy device node to make Xen map the framebuffer */
++    fragment@1 {
++        target-path = "/";
++        __overlay__ {
++            fb_bus {
++                compatible = "simple-bus";
++                ranges;
++                #address-cells = <2>;
++                #size-cells = <1>;
++                fb_mem {
++                    compatible = "dummy";
++                    status = "okay";
++                    reg = <0x0 0x3b400000 0x04c00000>;
++                };
 +            };
 +        };
 +    };
